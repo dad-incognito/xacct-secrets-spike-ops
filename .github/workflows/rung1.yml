@@ -1,0 +1,16 @@
+name: rung1
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha256:
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  rung1:
+    uses: andrewferk/xacct-secrets-spike-lib/.github/workflows/rung1.yml@main
+    with:
+      expected_sha256: ${{ inputs.expected_sha256 }}
