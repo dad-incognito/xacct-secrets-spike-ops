@@ -1,0 +1,31 @@
+name: control
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha256:
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    environment: spike
+    steps:
+      - name: Compare the secret's hash
+        env:
+          SPIKE_SECRET: ${{ secrets.SPIKE_SECRET }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+        run: |
+          if [ -z "$SPIKE_SECRET" ]; then
+            outcome=EMPTY
+          elif [ "$(printf '%s' "$SPIKE_SECRET" | sha256sum | cut -d' ' -f1)" = "$EXPECTED_SHA256" ]; then
+            outcome=MATCH
+          else
+            outcome=MISMATCH
+          fi
+          echo "SPIKE-RESULT test=control outcome=$outcome"
+          echo "**control**: \`$outcome\` (caller \`$GITHUB_REPOSITORY\`, workflow \`$GITHUB_WORKFLOW_REF\`)" >> "$GITHUB_STEP_SUMMARY"
+          [ "$outcome" = MATCH ]
